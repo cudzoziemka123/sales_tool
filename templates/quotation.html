@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ładowanie pliku</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            <img src="/static/mechanism.jpg"
+                 class="d-block mx-lg-auto img-fluid"
+                 alt="Mechanism Image" width="700" height="500">
+        </div>
+
+        <div class="col-lg-6"><h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3 pb-3">Załaduj plik</h1>
+            <p class="lead">Wybierz plik zapytania o ceny części producenta {{ brand }} w formacie xmlx. Kolumna z kodami musi być
+                zatytułowana "Code" a kolumna z ilościami - "Qty". Reszta kolumn nie będzie brana pod uwagę. Wycena zostanie przygotowana ze zniżką producenta
+                {{ discount }}% marżą
+                {{ markup }}% oraz przewalutowana w euro przy kursie 1 EUR = {{ euro }} PLN. Wycena trwa kilka minut, należy poczekac na zakończenie pracy programu.</p>
+            <form class="input-group" action="/upload/{{ brand }}/{{ markup }}/{{ discount }}/{{ euro }}/{{ for_client }}" method="post" enctype="multipart/form-data">
+                <input type="file" class="form-control" id="inputGroupFile04" name="file"
+                       aria-describedby="inputGroupFileAddon04"
+                       aria-label="Upload">
+                <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Załaduj</button>
+            </form>
+        </div>
+<!--<h1>DODAJ POLE DO WKLEJENIA KODÓW (JEŚLI MAMY NIE PLIK A LISTĘ KODÓW</h1>-->
+    </div>
+</div>
+</body>
+</html>

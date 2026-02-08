@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wycena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        .my-div {
+
+        }
+        a.fill-div {
+            display: block;
+            height: 100%;
+            width: 100%;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<!--HERO-->
+<div class="container col-xl-10 col-xxl-8 px-4 py-5">
+    <div class="row align-items-center g-lg-5 py-5">
+        <div class="col-lg-7 text-center text-lg-start"><h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">
+            Narzędzie do wyceny części</h1>
+            <p class="col-lg-10 fs-4">Strona służy do wyceny części do maszyn rolniczych producentów Samasz, Kverneland, Krone, Horsch, Claas oraz Amazone. Prosze o wybór klienta dla którego ma być sporządzona wycena po prawej oraz o wybór producenta poniżej.</p></div>
+        <div class="col-md-10 mx-auto col-lg-5">
+
+<!--DROPDOWN WYBÓR KLIENTA-->
+<div class="dropdown-menu d-block position-static pt-0 mx-0 rounded-3 shadow overflow-hidden w-280px"
+     data-bs-theme="light">
+    <form class="p-2 mb-2 bg-body-tertiary border-bottom"><input type="search" class="form-control" autocomplete="false"
+                                                                 placeholder="Type to filter..."></form>
+    <ul class="list-unstyled mb-0">
+        <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#"> <span
+                class="d-inline-block bg-success rounded-circle p-1"></span>
+            Agrotechmonolit
+        </a></li>
+        <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#"> <span
+                class="d-inline-block bg-primary rounded-circle p-1"></span>
+            Elis
+        </a></li>
+        <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#"> <span
+                class="d-inline-block bg-danger rounded-circle p-1"></span>
+            Miragromasz
+        </a></li>
+        <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#"> <span
+                class="d-inline-block bg-info rounded-circle p-1"></span>
+            VelesTorgAgro
+        </a></li>
+    </ul>
+</div>
+
+
+        </div>
+    </div>
+</div>
+<!--WYBÓR PRODUCENTA-->
+<div class="container pb-4" id="custom-cards"><h2 class="pb-2 border-bottom">Wybierz producenta</h2>
+    <div class="row row-cols-1 row-cols-lg-3 align-items-stretch ">
+        <div class="col">
+            <div class="pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/Kverneland.png'); background-position: center; background-size: 90%; background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='Kverneland') }}" class="fill-div">
+                </a>
+            </div>
+        </div>
+        <div class="col">
+            <div class="pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/Samasz.png'); background-position: center; background-size: 90%;  background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='Samasz') }}" class="fill-div"></a>
+            </div>
+        </div>
+        <div class="col">
+            <div class="pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/Krone.png'); background-position: center; background-size: 90%;  background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='Krone') }}" class="fill-div">
+                </a>
+            </div>
+        </div>
+        <div class="col">
+            <div class=" pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/Horsch.png'); background-position: center; background-size: 90%; background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='Horsch') }}" class="fill-div">
+                </a>
+            </div>
+        </div>
+        <div class="col">
+            <div class="pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/Claas.png'); background-position: center; background-size: 90%;  background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='Claas') }}" class="fill-div"></a>
+            </div>
+        </div>
+        <div class="col">
+            <div class="pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/Amazone.png'); background-position: center; background-size: 90%;  background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='Amazone') }}" class="fill-div">
+                </a>
+            </div>
+        </div>
+        <div class="col">
+            <div class="pt-5 mt-5 mb-4 pb-3 card card-cover h-75 overflow-hidden text-bg-light rounded-4 shadow-lg my-div"
+                 style="background-image: url('static/logos/John Deere.png'); background-position: center; background-size: 90%;  background-repeat: no-repeat;">
+                <a href="{{ url_for('chosen_brand', ch_brand='John Deere') }}" class="fill-div">
+                </a>
+            </div>
+        </div>
+<!--        DODAĆ JOHN DEERE-->
+    </div>
+</div>
+
+
+</body>
+
+</html>

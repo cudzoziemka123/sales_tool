@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Szczegóły wyceny</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body>
+<div class="container text-center">
+    <div class="row justify-content-center">
+        <div class="pt-5 text-center col-md-7 col-lg-7 ">
+            <h1 class="h2">Szczegóły wyceny</h1>
+            <p class="lead">Proszę o podanie szczegółów wyceny, będą one miały bezpośredni wpływ na wycenę końcową.</p>
+        </div>
+        <div class="col-md-7 col-lg-7 justify-content ">
+            <div class="d-flex text-body-secondary ">
+                <div class="col-3">
+                    <!--TODO Ogarnąć ograniczenie wielkości obrazka (wysokości)-->
+                    <img src="/static/logos/{{ brand }}.png"
+                         class="img-fluid bd-placeholder-img flex-shrink-1 me-4 rounded my-3 mx-1">
+                </div>
+            </div>
+            <form class="" action="/details/upload/{{ brand }}" method="post">
+                <div class="form-floating mb-3">
+                    <input type="number" class="form-control rounded-3"
+                           id="discount" name="discount" placeholder="15"> <label
+                        for="discount">Rabat producenta</label></div>
+                <div class="form-floating mb-3"><input type="number" class="form-control rounded-3"
+                                                       id="markup" name="markup" placeholder="25"> <label
+                        for="markup">Marża</label></div>
+                <div class="form-floating mb-3 pb-2">
+                    <input type="text" class="form-control rounded-3" id="euro" name="euro" placeholder="4,2">
+                    <label for="euro">Kurs euro</label>
+                </div>
+
+                <div class="form-check my-3 d-flex p-2">
+                    <input type="checkbox" class="form-check-input m-2"
+                           id="forClient" name="forClient" placeholder="4,2">
+                    <label class="form-check-label  " for="forClient">Wycena dla klienta</label>
+                </div>
+
+                <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Zatwierdź</button>
+                <small class="text-body-secondary">Podane szczegóły będą miały wpływ na końcową wycenę.</small>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
