@@ -23,6 +23,11 @@
             </div>
             <form class="" action="/details/upload/{{ brand }}" method="post">
                 <div class="form-floating mb-3">
+                    <input type="text" class="form-control rounded-3"
+                           id="client_name" name="client_name" placeholder="Nazwa klienta" value="{{ client_name or '' }}">
+                    <label for="client_name">Nazwa klienta</label>
+                </div>
+                <div class="form-floating mb-3">
                     <input type="number" class="form-control rounded-3"
                            id="discount" name="discount" placeholder="15"> <label
                         for="discount">Rabat producenta</label></div>

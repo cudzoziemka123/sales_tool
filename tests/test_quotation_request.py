@@ -12,10 +12,12 @@ class QuotationRequestTests(unittest.TestCase):
             discount="0.1",
             euro="4.2",
             for_client="true",
+            client_name="Agrotech",
         )
 
         self.assertEqual(request.filename, "doc.xlsx")
         self.assertEqual(request.brand, "Claas")
+        self.assertEqual(request.client_name, "Agrotech")
         self.assertEqual(request.markup, 12.5)
         self.assertEqual(request.discount, 0.1)
         self.assertEqual(request.euro, 4.2)
@@ -30,7 +32,22 @@ class QuotationRequestTests(unittest.TestCase):
                 discount="0.1",
                 euro="4.2",
                 for_client="false",
+                client_name="Agrotech",
             )
+
+    def test_from_raw_accepts_comma_decimal_separator(self):
+        request = QuotationRequest.from_raw(
+            filename="doc.xlsx",
+            brand="Claas",
+            markup="12,5",
+            discount="0,1",
+            euro="4,2",
+            for_client="true",
+            client_name="Agrotech",
+        )
+        self.assertEqual(request.markup, 12.5)
+        self.assertEqual(request.discount, 0.1)
+        self.assertEqual(request.euro, 4.2)
 
 
 if __name__ == "__main__":

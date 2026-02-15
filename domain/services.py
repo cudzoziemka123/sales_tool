@@ -52,6 +52,7 @@ def _normalize_code_and_qty(el: Dict[str, Any], brand: str) -> Tuple[str, str]:
     return str(code_str), qty_str
 
 
+
 def prepare_data_from_records(
     records: List[Dict[str, Any]], brand: str
 ) -> Dict[str, list]:

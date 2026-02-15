@@ -20,7 +20,13 @@
                 zatytułowana "Code" a kolumna z ilościami - "Qty". Reszta kolumn nie będzie brana pod uwagę. Wycena zostanie przygotowana ze zniżką producenta
                 {{ discount }}% marżą
                 {{ markup }}% oraz przewalutowana w euro przy kursie 1 EUR = {{ euro }} PLN. Wycena trwa kilka minut, należy poczekac na zakończenie pracy programu.</p>
-            <form class="input-group" action="/upload/{{ brand }}/{{ markup }}/{{ discount }}/{{ euro }}/{{ for_client }}" method="post" enctype="multipart/form-data">
+            <form class="input-group" action="/upload" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="client_name" value="{{ client_name }}">
+                <input type="hidden" name="brand" value="{{ brand }}">
+                <input type="hidden" name="markup" value="{{ markup }}">
+                <input type="hidden" name="discount" value="{{ discount }}">
+                <input type="hidden" name="euro" value="{{ euro }}">
+                <input type="hidden" name="for_client" value="{{ for_client }}">
                 <input type="file" class="form-control" id="inputGroupFile04" name="file"
                        aria-describedby="inputGroupFileAddon04"
                        aria-label="Upload">

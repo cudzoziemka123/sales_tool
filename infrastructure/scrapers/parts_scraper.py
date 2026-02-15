@@ -38,7 +38,7 @@ def _find_price(driver, code: str) -> None:
 def _get_price_by_code(driver, data: dict) -> None:
     """Pobiera cenę z bestOfferPrice i dodaje do data['prices']."""
     price = driver.find_element(By.CLASS_NAME, value="bestOfferPrice")
-    data["prices"].append(price.text.split(" ")[0])
+    data["prices"].append(price.text.split(" ")[0].replace("€", ""))
 
 
 def _get_price_by_brand(driver, brand: str, data: dict) -> None:
