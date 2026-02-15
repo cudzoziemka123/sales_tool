@@ -1,10 +1,16 @@
+import io
+
 import pandas as pd
 
 from domain import services as domain_services
+from infrastructure.db.postgres_file_store import get_latest_file_by_name_if_configured
 
 
 def load_data_from_excel(document_name: str) -> list[dict]:
-    data_file = pd.read_excel(f"from_client/{document_name}")
+    record = get_latest_file_by_name_if_configured("input", document_name)
+    if not record or not record.get("content"):
+        raise FileNotFoundError(f"Input file '{document_name}' not found in PostgreSQL.")
+    data_file = pd.read_excel(io.BytesIO(record["content"]))
     return data_file.to_dict("records")
 
 
@@ -22,4 +28,3 @@ def replace_wrong_letters(data_with_wrong_letters: str) -> str:
 def prepare_data(document: str, brand: str) -> dict:
     data_dict = load_data_from_excel(document)
     return domain_services.prepare_data_from_records(data_dict, brand)
-

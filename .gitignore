@@ -216,6 +216,8 @@ __marimo__/
 .streamlit/secrets.toml
 
 #My own
-env.py
-for_client
-from_client
+for_client/
+from_client/
+
+#IDE
+.idea/

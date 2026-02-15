@@ -1,8 +1,17 @@
-from flask import Flask, render_template, request, send_from_directory
+import io
+
+from flask import Flask, abort, jsonify, render_template, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 from application.dto.quotation_request import InvalidQuotationRequestError, QuotationRequest
 from infrastructure.config.env_loader import MissingEnvVarError
+from infrastructure.db.postgres_file_store import (
+    DatabaseStorageError,
+    get_file_if_configured,
+    get_latest_file_by_name_if_configured,
+    list_files_filtered_if_configured,
+    store_file_if_configured,
+)
 from presentation.bootstrap import get_dispatcher
 
 app = Flask(__name__)
@@ -17,6 +26,16 @@ def handle_invalid_quotation_request(error):
 
 @app.errorhandler(MissingEnvVarError)
 def handle_missing_env_var(error):
+    return str(error), 500
+
+
+@app.errorhandler(DatabaseStorageError)
+def handle_db_storage_error(error):
+    return str(error), 500
+
+
+@app.errorhandler(FileNotFoundError)
+def handle_file_not_found(error):
     return str(error), 500
 
 
@@ -57,7 +76,17 @@ def upload(brand, markup, discount, euro, for_client):
     # TODO add error handling for missing Code/Qty columns
     file = request.files['file']
     filename = secure_filename(file.filename)
-    file.save(f'from_client/{filename}')
+    file_content = file.read()
+
+    stored = store_file_if_configured(
+        kind="input",
+        filename=filename,
+        content=file_content,
+        mime_type=file.mimetype or "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        source_brand=brand,
+    )
+    if not stored:
+        raise DatabaseStorageError("Input file could not be stored in PostgreSQL.")
 
     quotation_request = QuotationRequest.from_raw(
         filename=filename,
@@ -82,6 +111,57 @@ def upload(brand, markup, discount, euro, for_client):
 @app.route('/uploaded_file/<filename>', methods=['GET', 'POST'])
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@app.route('/stored_files', methods=['GET'])
+def stored_files():
+    """List recent files mirrored to PostgreSQL, optionally filtered."""
+    limit_raw = request.args.get("limit", "300")
+    try:
+        limit = max(1, min(int(limit_raw), 1000))
+    except ValueError:
+        limit = 300
+    kind = request.args.get("kind") or None
+    source_brand = request.args.get("brand") or None
+    filename_contains = request.args.get("filename") or None
+
+    files = list_files_filtered_if_configured(
+        limit=limit,
+        kind=kind,
+        source_brand=source_brand,
+        filename_contains=filename_contains,
+    )
+    return jsonify(files)
+
+
+@app.route('/stored_files/<int:file_id>/download', methods=['GET'])
+def stored_file_download(file_id: int):
+    """Download a file payload from PostgreSQL by id."""
+    record = get_file_if_configured(file_id)
+    if not record:
+        abort(404, description="Stored file not found.")
+
+    return send_file(
+        io.BytesIO(record["content"]),
+        mimetype=record.get("mime_type") or "application/octet-stream",
+        as_attachment=True,
+        download_name=record.get("filename") or f"file_{file_id}",
+    )
+
+
+@app.route('/stored_files/latest_output/<filename>/download', methods=['GET'])
+def stored_latest_output_download(filename: str):
+    """Download latest generated output file by filename."""
+    record = get_latest_file_by_name_if_configured("output", filename)
+    if not record:
+        abort(404, description="Stored output file not found.")
+
+    return send_file(
+        io.BytesIO(record["content"]),
+        mimetype=record.get("mime_type") or "application/octet-stream",
+        as_attachment=True,
+        download_name=record.get("filename") or filename,
+    )
 
 
 if __name__ == '__main__':
