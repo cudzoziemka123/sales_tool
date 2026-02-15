@@ -2,11 +2,26 @@
 Scraper cen z portalu Samasz (kontrahenci.samasz.pl).
 """
 
+import re
 from time import sleep
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+
+
+def _extract_price_value(raw_price: str) -> str:
+    """
+    Extract numeric value from price text.
+
+    Handles values with thousand separators, e.g.:
+    - "1 500 PLN" -> "1500"
+    - "3 000,50 PLN" -> "3000,50"
+    """
+    match = re.search(r"\d[\d\s]*(?:[.,]\d+)?", raw_price)
+    if not match:
+        raise ValueError(f"Cannot parse price from: {raw_price!r}")
+    return match.group(0).replace(" ", "")
 
 
 def login_samasz(driver, company: str, email: str, password: str) -> None:
@@ -46,8 +61,9 @@ def scrape_prices(driver, data: dict) -> None:
         try:
             price = driver.find_element(By.CLASS_NAME, value="basic-price")
             samasz_code = driver.find_element(By.CLASS_NAME, value="product-code")
-            data["prices"].append(price.text.split(" ")[0])
+            parsed_price = _extract_price_value(price.text)
+            data["prices"].append(parsed_price)
             data["samasz_codes"].append(samasz_code.text)
-        except NoSuchElementException:
+        except (NoSuchElementException, ValueError):
             data["prices"].append("Nie znaleziono")
             data["samasz_codes"].append("Nie znaleziono")

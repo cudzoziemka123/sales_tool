@@ -1,52 +1,29 @@
-"""
-Use case: wycena dla marki Kverneland (KV).
+﻿"""
+Use case: quotation for Kverneland (KV).
 """
 
-import os
-from time import sleep
-
-from env import set_env_var
-from file_interpeter import prepare_data_kv
-from infrastructure.file_io.quotation_exporter import export_quotation_from_lists
-from infrastructure.scrapers.kv_scraper import (
-    get_codes_list,
-    get_price_list,
-    get_qty_list,
-    get_titles_list,
-    login_kv,
-    reduce_codes_by_titles,
-    search_codes,
-)
-from infrastructure.selenium.webdriver_factory import create_chrome_driver
+from application.dto.quotation_request import QuotationRequest
+from application.ports.kv_quotation_ports import KvExporterPort, KvInputDataPort, KvPriceProviderPort
 
 
 class CreateKvQuotation:
-    """Use case tworzenia wyceny Kverneland."""
+    """Use case for creating Kverneland quotation."""
 
-    def __init__(self, base_url: str = "https://www.kvgportal.com/AtpCheck/"):
-        self.base_url = base_url
+    def __init__(
+        self,
+        input_data_port: KvInputDataPort,
+        price_provider_port: KvPriceProviderPort,
+        exporter_port: KvExporterPort,
+    ):
+        self._input_data_port = input_data_port
+        self._price_provider_port = price_provider_port
+        self._exporter_port = exporter_port
 
-    def execute(self, filename: str, details: dict) -> str:
-        """Wykonuje wycenę KV – ATP Check, pobranie cen, eksport."""
-        set_env_var()
-        email = os.getenv("KV_LOGIN")
-        password = os.getenv("KV_PASSWORD")
-
-        data = prepare_data_kv(filename)
-        driver = create_chrome_driver()
-        driver.get(self.base_url)
-        sleep(3)
-
-        login_kv(driver, email, password)
-        search_codes(driver, data)
-
-        codes_list = get_codes_list(driver)
-        titles_list = get_titles_list(driver)
-        codes_list = reduce_codes_by_titles(titles_list, codes_list)
-        qty_list = get_qty_list(driver)
-        price_list = get_price_list(driver)
-
-        driver.quit()
-
+    def execute(self, request: QuotationRequest) -> str:
+        """Run KV quotation flow using injected ports."""
+        filename = request.filename
+        search_payload = self._input_data_port.prepare(filename)
+        codes_list, qty_list, price_list = self._price_provider_port.fetch(search_payload)
         document = filename.replace(".xlsx", "") if filename.endswith(".xlsx") else filename
-        return export_quotation_from_lists(codes_list, qty_list, price_list, document)
+        return self._exporter_port.export(codes_list, qty_list, price_list, document)
+

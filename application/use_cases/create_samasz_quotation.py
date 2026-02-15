@@ -1,40 +1,29 @@
-"""
-Use case: wycena dla marki Samasz.
+﻿"""
+Use case: quotation for Samasz brand.
 """
 
-import os
-from time import sleep
-
-from env import set_env_var
-from file_interpeter import prepare_data
-from infrastructure.file_io.quotation_exporter import export_quotation
-from infrastructure.scrapers.samasz_scraper import login_samasz, scrape_prices
-from infrastructure.selenium.webdriver_factory import create_chrome_driver
+from application.dto.quotation_request import QuotationRequest
+from application.ports.quotation_ports import InputDataPort, PriceProviderPort, QuotationExporterPort
 
 
 class CreateSamaszQuotation:
-    """Use case tworzenia wyceny Samasz."""
+    """Use case for creating Samasz quotation."""
 
-    def __init__(self, base_url: str = "https://kontrahenci.samasz.pl/login"):
-        self.base_url = base_url
+    def __init__(
+        self,
+        input_data_port: InputDataPort,
+        price_provider_port: PriceProviderPort,
+        exporter_port: QuotationExporterPort,
+    ):
+        self._input_data_port = input_data_port
+        self._price_provider_port = price_provider_port
+        self._exporter_port = exporter_port
 
-    def execute(self, filename: str, details: dict) -> str:
-        """
-        Wykonuje wycenę Samasz – logowanie na portal, wyszukanie cen, eksport.
-        """
-        set_env_var()
-        company = os.environ.get("SAMASZ_COMPANY")
-        email = os.environ.get("SAMASZ_LOGIN")
-        password = os.environ.get("SAMASZ_PASSWORD")
+    def execute(self, request: QuotationRequest) -> str:
+        """Run Samasz quotation flow using injected ports."""
+        filename = request.filename
+        brand = request.brand
+        data = self._input_data_port.prepare(filename, brand)
+        self._price_provider_port.fill_prices(brand, data)
+        return self._exporter_port.export(data, filename)
 
-        data = prepare_data(filename, details["brand"])
-        driver = create_chrome_driver()
-        driver.get(self.base_url)
-        sleep(5)
-
-        login_samasz(driver, company, email, password)
-        sleep(5)
-        scrape_prices(driver, data)
-        driver.quit()
-
-        return export_quotation(data, filename)
