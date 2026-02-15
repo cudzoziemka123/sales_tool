@@ -1,16 +1,14 @@
-import pandas as pd
-from file_interpeter import prepare_data, create_quotation_file
+"""
+Mostek (adapter) – zachowuje stare API dla server.py.
 
-pricelist = pd.read_excel('static/2025_CLAAS.xlsx')
+Wszystka logika jest w application.use_cases.create_claas_quotation.
+"""
+
+from application.use_cases.create_claas_quotation import CreateClaasQuotation
+
+_use_case = CreateClaasQuotation()
+
 
 def do_claas_quotation(filename, details):
-    data = prepare_data(filename,details['brand'])
-    for code in data['codes']:
-        month_price=pricelist.loc[pricelist["Part"] == float(code), "Monthly"]
-        week_price=pricelist.loc[pricelist["Part"] == float(code), "Weekly"]
-        data['monthly_prices'].append(month_price.values[0])
-        data['weekly_prices'].append(week_price.values[0])
-    file_name = create_quotation_file(data,filename)
-    return file_name
-
-
+    """Legacy entry point – deleguje do use case."""
+    return _use_case.execute(filename, details)

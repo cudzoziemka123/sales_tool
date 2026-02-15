@@ -1,0 +1,3 @@
+"""
+Pakiet obsługi Selenium (WebDriver).
+"""

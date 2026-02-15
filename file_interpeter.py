@@ -1,5 +1,7 @@
 import pandas as pd
-from selenium import webdriver
+
+from domain import services as domain_services
+
 
 def load_data_from_excel(document_name):
     data_file = pd.read_excel(f"from_client/{document_name}")
@@ -18,72 +20,32 @@ def replace_wrong_letters(data_with_wrong_letters):
     data = data_with_wrong_letters.replace("К", "K")
     return data
 
+
 def set_webdriver_options():
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_experimental_option("detach", True)
-    driver_chrome = webdriver.Chrome(options=chrome_options)
-    return driver_chrome
-
-def add_zeros_for_horsch(code):
-    if len(code) < 7:
-        new_code = code.rjust(8 - len(code) + len(code), '0')
-    else:
-        new_code = code
-    return new_code
+    """Adapter – deleguje do warstwy infrastruktury (zachowana kompatybilność wsteczna)."""
+    from infrastructure.selenium.webdriver_factory import create_chrome_driver
+    return create_chrome_driver()
 
 
-def reduce_floats(el):
-    code_str = str(el["Code"]).split(".")[0]
-    qty_str = str(el["Qty"]).split(".")[0]
-    return {'code_str': code_str, 'qty_str': qty_str}
+def prepare_data(document, brand):
+    """
+    Adapter infrastruktury → domena.
 
-def prepare_data(document,brand):
-    data = {
-        'codes': [],
-        'qty': [],
-        'monthly_prices': [],
-        'weekly_prices': [],
-        'samasz_codes': [],
-        'prices': [],
-    }
-
+    Tutaj wczytujemy Excela (I/O), a faktyczną logikę przygotowania
+    struktur danych przekazujemy do `domain.services`.
+    """
     data_dict = load_data_from_excel(document)
-    # if brand == "Kverneland":
-    #     data_kv=prepare_data_kv(data_dict)
-    #     return data_kv
-    #
-    for data_el in data_dict:
-        if brand != "Samasz":
-            reduced_data_el = reduce_floats(data_el)
-            qty_str = reduced_data_el['qty_str']
-
-            if brand == "Horsch":
-                code_str = add_zeros_for_horsch(reduced_data_el['code_str'])
-            else:
-                code_str = reduced_data_el['code_str']
-
-        else:
-            code_str = str(data_el["Code"])
-            qty_str = str(data_el["Qty"])
-
-        data['codes'].append(str(code_str))
-        data['qty'].append(qty_str)
-    return data
+    return domain_services.prepare_data_from_records(data_dict, brand)
 
 
 def create_quotation_file(data, document):
-    # ZAPISYWANIE WYCENY DO PLIKU EXCEL
-    reduced_data= remove_empty_keys(data)
-    quotation = pd.DataFrame(reduced_data)
-    filename=f"{document}_quotation.xlsx"
-    quotation.to_excel(f"for_client/{filename}",index=False)
-    return filename
+    """Adapter – deleguje zapis do warstwy infrastruktury."""
+    from infrastructure.file_io.quotation_exporter import export_quotation
+    return export_quotation(data, document)
 
-def remove_empty_keys(quotation_data):
-    reduced_data=quotation_data.copy()
-    for key, value in quotation_data.items():
-        if not value:
-            del reduced_data[key]
-    return reduced_data
 
-# TODO Wycena dla klienta
+def price_for_client(price, discount, markup, euro):
+    """
+    Zachowujemy to samo API, ale delegujemy logikę do warstwy domeny.
+    """
+    return domain_services.price_for_client(price, discount, markup, euro)

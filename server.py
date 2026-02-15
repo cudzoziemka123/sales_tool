@@ -14,6 +14,7 @@ app.config['UPLOAD_FOLDER']='for_client'
 # STRONA GŁÓWNA
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    # client = request.form['client']
     return render_template('index.html')
 
 # STRONA Z MODALEM DO WYBORU MARŻY, RABATU I RODZAJU WYCENY
@@ -38,6 +39,7 @@ def details_upload(brand):
 # ZAPISUJE PLIK I ODPALA SKRYPT Z WYCENIANIEM
 @app.route('/upload/<brand>/<markup>/<discount>/<euro>/<for_client>', methods=['GET','POST'])
 def upload(brand, markup, discount, euro, for_client):
+    # TODO Zrobić obróbkę błędu kiedy nie ma kolumn Code i Qty w dokumencie
     file = request.files['file']
     filename = secure_filename(file.filename)
     file.save(f'from_client/{filename}')
