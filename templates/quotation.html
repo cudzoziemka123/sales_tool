@@ -10,17 +10,17 @@
 <div class="container col-xxl-8 px-4 py-5">
     <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
         <div class="col-10 col-sm-8 col-lg-6">
-            <img src="/static/mechanism.jpg"
+            <img src="/static/loading-19.svg"
                  class="d-block mx-lg-auto img-fluid"
-                 alt="Mechanism Image" width="700" height="500">
+                 alt="Loading Animation" width="700" height="500">
         </div>
 
         <div class="col-lg-6"><h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3 pb-3">Załaduj plik</h1>
-            <p class="lead">Wybierz plik zapytania o ceny części producenta {{ brand }} w formacie xmlx. Kolumna z kodami musi być
-                zatytułowana "Code" a kolumna z ilościami - "Qty". Reszta kolumn nie będzie brana pod uwagę. Wycena zostanie przygotowana ze zniżką producenta
-                {{ discount }}% marżą
-                {{ markup }}% oraz przewalutowana w euro przy kursie 1 EUR = {{ euro }} PLN. Wycena trwa kilka minut, należy poczekac na zakończenie pracy programu.</p>
-            <form class="input-group" action="/upload" method="post" enctype="multipart/form-data">
+            <p class="fs-4 pt-4 pb-5">Wybierz plik zapytania o ceny części producenta <strong>{{ brand }}</strong> w formacie xmlx. Kolumna z kodami musi być
+                zatytułowana <strong>"Code"</strong> a kolumna z ilościami - <strong>"Qty"</strong>. Reszta kolumn nie będzie brana pod uwagę. Wycena zostanie przygotowana ze zniżką producenta
+               <strong>{{ discount }}%</strong> marżą
+                <strong>{{ markup }}%</strong> oraz przewalutowana w euro przy kursie <strong>1 EUR = {{ euro }} PLN</strong>. Wycena trwa kilka minut, należy poczekac na zakończenie pracy programu.</p>
+            <form class="input-group pt-2" action="/upload" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="client_name" value="{{ client_name }}">
                 <input type="hidden" name="brand" value="{{ brand }}">
                 <input type="hidden" name="markup" value="{{ markup }}">

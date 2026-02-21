@@ -199,7 +199,9 @@ def stored_files():
         source_brand=source_brand,
         filename_contains=filename_contains,
     )
+    # return render_template('quotations_view.html', files=files)
     return _add_deprecation_headers(jsonify(files))
+
 
 
 @app.route('/stored_files/<int:file_id>/download', methods=['GET'])
