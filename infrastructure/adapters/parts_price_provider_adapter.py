@@ -1,7 +1,7 @@
 from time import sleep
 
 from infrastructure.config.env_loader import get_required_env
-from infrastructure.scrapers.parts_scraper import login_to_account, scrape_prices
+from infrastructure.scrapers.parts_scraper import login_to_account, scrape_prices, warmup_parts
 from infrastructure.selenium.webdriver_factory import create_chrome_driver
 
 
@@ -20,8 +20,7 @@ class PartsPriceProviderAdapter:
             driver.get(self._base_url)
             sleep(2)
             login_to_account(driver, login, password)
-            sleep(3)
+            warmup_parts(driver)
             scrape_prices(driver, brand, data)
-            sleep(3)
         finally:
             driver.quit()

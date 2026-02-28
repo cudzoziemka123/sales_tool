@@ -7,6 +7,7 @@ tak aby:
 - a przygotowanie danych i wyliczanie cen było w domenie.
 """
 
+import re
 from typing import Any, Dict, List, Tuple
 
 
@@ -86,7 +87,75 @@ def price_for_client(price: float, discount: float, markup: float, euro: float) 
     """
     Logika przeliczania ceny dla klienta – przeniesiona 1:1 z `file_interpeter.py`.
     """
-    price_with_discount = price - price * discount
+    # Obsługujemy oba formaty rabatu:
+    # - 0.15 (ułamek)
+    # - 15 (procent)
+    discount_ratio = discount / 100 if discount > 1 else discount
+    price_with_discount = price - price * discount_ratio
     euro_price = price_with_discount / euro
     price_with_markup = euro_price * ((100 + markup) / 100)
     return round(price_with_markup, 2)
+
+
+def parse_price_to_float(raw_price: Any) -> float | None:
+    """
+    Parses supplier price text into float.
+    Returns None for non-numeric values (e.g. 'Nie znaleziono', 'Brak ceny').
+    """
+    if raw_price is None:
+        return None
+
+    text = str(raw_price).strip()
+    if not text:
+        return None
+
+    # Keep only numeric token (with separators), strip spaces and normalize comma decimal separator.
+    match = re.search(r"\d[\d\s.,]*", text)
+    if not match:
+        return None
+
+    numeric = match.group(0).replace(" ", "")
+
+    # Heuristics:
+    # - both '.' and ',' => dots are thousands separators, comma is decimal separator
+    # - only ',' => comma is decimal separator
+    if "," in numeric and "." in numeric:
+        numeric = numeric.replace(".", "").replace(",", ".")
+    elif "," in numeric:
+        numeric = numeric.replace(",", ".")
+
+    try:
+        return float(numeric)
+    except ValueError:
+        return None
+
+
+def apply_client_prices_to_data(data: Dict[str, list], discount: float, markup: float, euro: float) -> None:
+    """
+    Adds `prices_for_client` values computed from supplier `prices`.
+    Keeps alignment with input rows; for non-numeric rows keeps original marker text.
+    """
+    client_prices: list[Any] = []
+    for raw_price in data.get("prices", []):
+        parsed = parse_price_to_float(raw_price)
+        if parsed is None:
+            client_prices.append(raw_price)
+        else:
+            client_prices.append(price_for_client(parsed, discount, markup, euro))
+
+    data["prices_for_client"] = client_prices
+
+
+def apply_client_prices_to_list(prices: List[Any], discount: float, markup: float, euro: float) -> List[Any]:
+    """
+    Computes client prices for plain list-based flows (KV).
+    For non-numeric entries keeps original value.
+    """
+    result: list[Any] = []
+    for raw_price in prices:
+        parsed = parse_price_to_float(raw_price)
+        if parsed is None:
+            result.append(raw_price)
+        else:
+            result.append(price_for_client(parsed, discount, markup, euro))
+    return result

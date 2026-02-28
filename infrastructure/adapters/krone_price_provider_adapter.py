@@ -1,7 +1,12 @@
 from time import sleep
 
 from infrastructure.config.env_loader import get_required_env
-from infrastructure.scrapers.krone_scraper import accept_cookies_modal, login_krone, scrape_prices
+from infrastructure.scrapers.krone_scraper import (
+    accept_cookies_modal,
+    login_krone,
+    scrape_prices,
+    warmup_krone,
+)
 from infrastructure.selenium.webdriver_factory import create_chrome_driver
 
 
@@ -22,6 +27,7 @@ class KronePriceProviderAdapter:
             sleep(2)
             accept_cookies_modal(driver)
             login_krone(driver, login, password)
+            warmup_krone(driver)
             scrape_prices(driver, data)
         finally:
             driver.quit()

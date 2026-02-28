@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wystąpił błąd</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+<div class="container py-5">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Nie udało się przetworzyć żądania</h4>
+        <p class="mb-2">{{ message }}</p>
+        {% if details %}
+        <p class="mb-2 text-break"><small>{{ details }}</small></p>
+        {% endif %}
+        <hr>
+        <p class="mb-0"><strong>Kod błędu:</strong> {{ error_code }}</p>
+        <p class="mb-0"><strong>Request ID:</strong> {{ request_id }}</p>
+    </div>
+    <a class="btn btn-primary" href="/">Wróć do strony głównej</a>
+</div>
+</body>
+</html>

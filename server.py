@@ -1,11 +1,30 @@
 import io
+import os
+import uuid
+from pathlib import Path
 
-from flask import Flask, abort, jsonify, render_template, request, send_file
 import pandas as pd
+from flask import Flask, abort, g, jsonify, render_template, request, send_file
+from sqlalchemy import create_engine, text
+from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 from werkzeug.utils import secure_filename
+from selenium.common.exceptions import (
+    StaleElementReferenceException,
+    TimeoutException as SeleniumTimeoutException,
+    WebDriverException,
+)
 
 from application.dto.quotation_request import InvalidQuotationRequestError, QuotationRequest
-from infrastructure.config.env_loader import MissingEnvVarError
+from application.errors import (
+    AppError,
+    ConfigAppError,
+    ExternalServiceAppError,
+    ExternalTimeoutAppError,
+    NotFoundAppError,
+    StorageAppError,
+    UploadTooLargeAppError,
+)
+from infrastructure.config.env_loader import MissingEnvVarError, ensure_env_loaded
 from infrastructure.db.quotation_data_store import (
     get_latest_run_id_by_output_filename_if_configured,
     get_run_meta_if_configured,
@@ -21,8 +40,37 @@ from infrastructure.db.postgres_file_store import (
 from presentation.bootstrap import get_dispatcher
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB
+ensure_env_loaded()
+
 _DISPATCHER = get_dispatcher()
 _REQUIRED_INPUT_COLUMNS = ("Code", "Qty")
+_LOCAL_INPUT_DIR = Path("from_client")
+_LOCAL_OUTPUT_DIR = Path("for_client")
+_REQUIRED_ENV_KEYS = (
+    "SAMASZ_COMPANY",
+    "SAMASZ_LOGIN",
+    "SAMASZ_PASSWORD",
+    "KRONE_LOGIN",
+    "KRONE_PASSWORD",
+    "KV_LOGIN",
+    "KV_PASSWORD",
+    "PARTS_LOGIN",
+    "PARTS_PASSWORD",
+)
+
+_ERROR_USER_MESSAGES = {
+    "ERR_INVALID_QUOTATION_REQUEST": "Nieprawidlowe dane formularza lub pliku.",
+    "ERR_UPLOAD_TOO_LARGE": "Plik jest za duzy. Maksymalny rozmiar to 10 MB.",
+    "ERR_CONFIG": "Brak wymaganej konfiguracji srodowiska.",
+    "ERR_STORAGE": "Wystapil blad zapisu/odczytu danych.",
+    "ERR_NOT_FOUND": "Nie znaleziono zasobu.",
+    "ERR_EXTERNAL_SERVICE": "Blad uslugi zewnetrznej (integracja scrapera).",
+    "ERR_EXTERNAL_TIMEOUT": "Przekroczono czas oczekiwania na odpowiedz uslugi zewnetrznej.",
+    "ERR_HTTP_413": "Plik jest za duzy.",
+    "ERR_HTTP_404": "Nie znaleziono zasobu.",
+    "ERR_INTERNAL": "Wystapil nieoczekiwany blad aplikacji.",
+}
 
 
 def _require_form_field(name: str) -> str:
@@ -46,6 +94,34 @@ def _add_deprecation_headers(response):
     return response
 
 
+def _json_response(payload: dict, status: int):
+    response = jsonify(payload)
+    response.status_code = status
+    return response
+
+
+def _wants_json_error() -> bool:
+    if request.path.startswith("/quotations"):
+        return True
+    if request.path.startswith("/health"):
+        return True
+    accepts_json = "application/json" in (request.headers.get("Accept") or "")
+    xhr = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    return accepts_json or xhr
+
+
+def _should_expose_error_details(error: AppError) -> bool:
+    if app.debug:
+        return True
+    # Keep user-facing details only for validation/config-like errors.
+    return error.code in {
+        "ERR_INVALID_QUOTATION_REQUEST",
+        "ERR_CONFIG",
+        "ERR_UPLOAD_TOO_LARGE",
+        "ERR_NOT_FOUND",
+    }
+
+
 def _validate_uploaded_excel_columns(file_content: bytes) -> None:
     try:
         data_frame = pd.read_excel(io.BytesIO(file_content), nrows=0)
@@ -65,30 +141,117 @@ def _validate_uploaded_excel_columns(file_content: bytes) -> None:
         )
 
 
-@app.errorhandler(InvalidQuotationRequestError)
-def handle_invalid_quotation_request(error):
-    return str(error), 400
+def _map_legacy_exception(error: Exception) -> AppError | None:
+    if isinstance(error, AppError):
+        return error
+    if isinstance(error, InvalidQuotationRequestError):
+        return InvalidQuotationRequestError(str(error))
+    if isinstance(error, MissingEnvVarError):
+        return ConfigAppError(str(error), code="ERR_CONFIG")
+    if isinstance(error, DatabaseStorageError):
+        return StorageAppError(str(error), code="ERR_STORAGE")
+    if isinstance(error, FileNotFoundError):
+        return NotFoundAppError(str(error), code="ERR_NOT_FOUND")
+    if isinstance(error, SeleniumTimeoutException):
+        return ExternalTimeoutAppError(str(error), code="ERR_EXTERNAL_TIMEOUT")
+    if isinstance(error, (StaleElementReferenceException, WebDriverException)):
+        return ExternalServiceAppError(str(error), code="ERR_EXTERNAL_SERVICE", retryable=True)
+    if isinstance(error, RequestEntityTooLarge):
+        return UploadTooLargeAppError(str(error))
+    if isinstance(error, HTTPException):
+        code = f"ERR_HTTP_{error.code}" if error.code else "ERR_HTTP"
+        return AppError(error.description or str(error), code=code, status_code=error.code or 500)
+    return None
 
 
-@app.errorhandler(MissingEnvVarError)
-def handle_missing_env_var(error):
-    return str(error), 500
+def _health_checks() -> dict:
+    checks = {
+        "input_dir_exists": _LOCAL_INPUT_DIR.exists(),
+        "output_dir_exists": _LOCAL_OUTPUT_DIR.exists(),
+    }
+    missing_env = [name for name in _REQUIRED_ENV_KEYS if not os.getenv(name)]
+    checks["missing_env_vars"] = missing_env
+    ok = checks["input_dir_exists"] and checks["output_dir_exists"] and not missing_env
+    return {"status": "ok" if ok else "degraded", "checks": checks}
 
 
-@app.errorhandler(DatabaseStorageError)
-def handle_db_storage_error(error):
-    return str(error), 500
+def _deep_health_checks() -> dict:
+    result = _health_checks()
+    db_available = False
+    dsn = os.getenv("POSTGRES_DSN")
+    if dsn:
+        try:
+            engine = create_engine(dsn, future=True, pool_pre_ping=True)
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            db_available = True
+        except Exception:
+            db_available = False
+
+    claas_candidates = [Path("static") / "2025_CLAAS.xlsx", Path("static") / "Claas_Prices_List.xlsx"]
+    claas_price_list_path = next((path for path in claas_candidates if path.exists()), claas_candidates[0])
+    result["checks"]["db_available"] = db_available
+    result["checks"]["claas_price_list_exists"] = claas_price_list_path.exists()
+    if not result["checks"]["claas_price_list_exists"]:
+        result["status"] = "degraded"
+    return result
 
 
-@app.errorhandler(FileNotFoundError)
-def handle_file_not_found(error):
-    return str(error), 500
+@app.before_request
+def _attach_request_id():
+    g.request_id = str(uuid.uuid4())
+
+
+@app.after_request
+def _add_request_id_header(response):
+    request_id = getattr(g, "request_id", None)
+    if request_id:
+        response.headers["X-Request-ID"] = request_id
+    return response
+
+
+@app.errorhandler(AppError)
+def _handle_app_error(error: AppError):
+    request_id = getattr(g, "request_id", None)
+    user_message = _ERROR_USER_MESSAGES.get(error.code, str(error))
+    details = str(error) if _should_expose_error_details(error) else None
+    payload = {
+        "error": {
+            "code": error.code,
+            "message": user_message,
+            "details": details,
+            "retryable": error.retryable,
+        },
+        "request_id": request_id,
+    }
+    if _wants_json_error():
+        return _json_response(payload, error.status_code)
+    return (
+        render_template(
+            "error.html",
+            message=user_message,
+            details=details,
+            error_code=error.code,
+            request_id=request_id,
+        ),
+        error.status_code,
+    )
+
+
+@app.errorhandler(Exception)
+def _handle_exception(error: Exception):
+    mapped = _map_legacy_exception(error)
+    if mapped is not None:
+        return _handle_app_error(mapped)
+    internal = AppError(str(error), code="ERR_INTERNAL", status_code=500, retryable=False)
+    return _handle_app_error(internal)
 
 
 # HOME PAGE
 @app.route('/', methods=['GET'])
 def home():
     return render_template('index.html')
+
 
 # PAGE WITH MODAL FOR MARKUP, DISCOUNT, AND QUOTATION TYPE
 @app.route('/chosen_brand/<ch_brand>')
@@ -144,7 +307,8 @@ def upload():
         source_brand=brand,
     )
     if not stored:
-        raise DatabaseStorageError("Input file could not be stored in PostgreSQL.")
+        _LOCAL_INPUT_DIR.mkdir(parents=True, exist_ok=True)
+        (_LOCAL_INPUT_DIR / filename).write_bytes(file_content)
 
     quotation_request = QuotationRequest.from_raw(
         filename=filename,
@@ -157,12 +321,14 @@ def upload():
     )
 
     quotation_file = _DISPATCHER.execute_quotation(quotation_request)
-    run_id = get_latest_run_id_by_output_filename_if_configured(quotation_file)
+    run_id = get_latest_run_id_by_output_filename_if_configured(quotation_file) if stored else None
+    warning_message = None
     if run_id is None:
-        raise DatabaseStorageError(
-            "Quotation run was not persisted in PostgreSQL. "
-            "Output file is available only from quotation runs."
+        warning_message = (
+            "Wycena zostala zapisana lokalnie. Baza danych jest niedostepna, "
+            "dlatego uzywany jest fallback do pliku."
         )
+
     return render_template(
         'summary.html',
         brand=brand,
@@ -172,6 +338,21 @@ def upload():
         euro=euro,
         filename=quotation_file,
         run_id=run_id,
+        warning_message=warning_message,
+    )
+
+
+@app.route('/local_output/<filename>/download', methods=['GET'])
+def local_output_download(filename: str):
+    safe_name = secure_filename(filename)
+    file_path = _LOCAL_OUTPUT_DIR / safe_name
+    if not file_path.exists():
+        raise NotFoundAppError(f"Output file not found: {safe_name}", code="ERR_NOT_FOUND")
+    return send_file(
+        file_path,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=safe_name,
     )
 
 
@@ -187,7 +368,6 @@ def uploaded_file(filename):
 @app.route('/stored_files', methods=['GET'])
 def stored_files():
     """Deprecated: legacy file mirror endpoint."""
-    """List recent files mirrored to PostgreSQL, optionally filtered."""
     limit = _parse_limit(default=300)
     kind = request.args.get("kind") or None
     source_brand = request.args.get("brand") or None
@@ -199,9 +379,12 @@ def stored_files():
         source_brand=source_brand,
         filename_contains=filename_contains,
     )
-    # return render_template('quotations_view.html', files=files)
     return _add_deprecation_headers(jsonify(files))
 
+
+@app.route('/dashboard', methods=['GET'])
+def dashboard():
+    return render_template('dashboard.html')
 
 
 @app.route('/stored_files/<int:file_id>/download', methods=['GET'])
@@ -279,5 +462,22 @@ def quotation_run_download(run_id: int):
     )
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    result = _health_checks()
+    status = 200 if result["status"] == "ok" else 503
+    return _json_response(result, status)
+
+
+@app.route("/health/deep", methods=["GET"])
+def health_deep():
+    result = _deep_health_checks()
+    status = 200 if result["status"] == "ok" else 503
+    return _json_response(result, status)
+
+
 if __name__ == '__main__':
-    app.run(port=4999, debug=True)
+    app.run(
+        port=4999,
+        debug=os.getenv("FLASK_DEBUG", "").lower() in {"1", "true", "yes"},
+    )

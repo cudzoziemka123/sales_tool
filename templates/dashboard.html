@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sales Tool Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet" />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .sidebar {
+        background: linear-gradient(180deg, #007bff, #0056b3);
+        min-height: 100vh;
+      }
+      .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      }
+      .stat-card {
+        transition: transform 0.2s;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="col-xl-5">
+      <!-- card -->
+      <div class="card card-h-100">
+        <!-- card body -->
+        <div class="card-body">
+          <div class="d-flex flex-wrap align-items-center mb-4">
+            <h5 class="card-title me-2">Wallet Balance</h5>
+            <div class="ms-auto">
+              <div>
+                <button type="button" class="btn btn-soft-secondary btn-sm">
+                  ALL
+                </button>
+                <button type="button" class="btn btn-soft-primary btn-sm">
+                  1M
+                </button>
+                <button type="button" class="btn btn-soft-secondary btn-sm">
+                  6M
+                </button>
+                <button type="button" class="btn btn-soft-secondary btn-sm">
+                  1Y
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row align-items-center">
+            <div class="col-sm">
+              <div
+                id="wallet-balance"
+                data-colors='["#777aca", "#5156be", "#a8aada"]'
+                class="apex-charts"
+                style="min-height: 209.8px">
+                <div
+                  id="apexcharts6hvwnvix"
+                  class="apexcharts-canvas apexcharts6hvwnvix apexcharts-theme-light"
+                  style="width: 227px; height: 209.8px">
+                  <svg
+                    id="SvgjsSvg1606"
+                    width="227"
+                    height="209.79999999999998"
+                    xmlns="http://www.w3.org/2000/svg"
+                    version="1.1"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    xmlns:svgjs="http://svgjs.com/svgjs"
+                    class="apexcharts-svg"
+                    xmlns:data="ApexChartsNS"
+                    transform="translate(0, 0)"
+                    style="background: transparent">
+                    <g
+                      id="SvgjsG1608"
+                      class="apexcharts-inner apexcharts-graphical"
+                      transform="translate(13, 0)">
+                      <defs id="SvgjsDefs1607">
+                        <clipPath id="gridRectMask6hvwnvix">
+                          <rect
+                            id="SvgjsRect1610"
+                            width="207"
+                            height="225"
+                            x="-2"
+                            y="0"
+                            rx="0"
+                            ry="0"
+                            opacity="1"
+                            stroke-width="0"
+                            stroke="none"
+                            stroke-dasharray="0"
+                            fill="#fff"></rect>
+                        </clipPath>
+                        <clipPath id="gridRectMarkerMask6hvwnvix">
+                          <rect
+                            id="SvgjsRect1611"
+                            width="207"
+                            height="229"
+                            x="-2"
+                            y="-2"
+                            rx="0"
+                            ry="0"
+                            opacity="1"
+                            stroke-width="0"
+                            stroke="none"
+                            stroke-dasharray="0"
+                            fill="#fff"></rect>
+                        </clipPath>
+                        <filter
+                          id="SvgjsFilter1619"
+                          filterUnits="userSpaceOnUse"
+                          width="200%"
+                          height="200%"
+                          x="-50%"
+                          y="-50%">
+                          <feFlood
+                            id="SvgjsFeFlood1620"
+                            flood-color="#000000"
+                            flood-opacity="0.45"
+                            result="SvgjsFeFlood1620Out"
+                            in="SourceGraphic"></feFlood>
+                          <feComposite
+                            id="SvgjsFeComposite1621"
+                            in="SvgjsFeFlood1620Out"
+                            in2="SourceAlpha"
+                            operator="in"
+                            result="SvgjsFeComposite1621Out"></feComposite>
+                          <feOffset
+                            id="SvgjsFeOffset1622"
+                            dx="1"
+                            dy="1"
+                            result="SvgjsFeOffset1622Out"
+                            in="SvgjsFeComposite1621Out"></feOffset>
+                          <feGaussianBlur
+                            id="SvgjsFeGaussianBlur1623"
+                            stdDeviation="1 "
+                            result="SvgjsFeGaussianBlur1623Out"
+                            in="SvgjsFeOffset1622Out"></feGaussianBlur>
+                          <feMerge
+                            id="SvgjsFeMerge1624"
+                            result="SvgjsFeMerge1624Out"
+                            in="SourceGraphic">
+                            <feMergeNode
+                              id="SvgjsFeMergeNode1625"
+                              in="SvgjsFeGaussianBlur1623Out"></feMergeNode>
+                            <feMergeNode
+                              id="SvgjsFeMergeNode1626"
+                              in="[object Arguments]"></feMergeNode>
+                          </feMerge>
+                          <feBlend
+                            id="SvgjsFeBlend1627"
+                            in="SourceGraphic"
+                            in2="SvgjsFeMerge1624Out"
+                            mode="normal"
+                            result="SvgjsFeBlend1627Out"></feBlend>
+                        </filter>
+                        <filter
+                          id="SvgjsFilter1632"
+                          filterUnits="userSpaceOnUse"
+                          width="200%"
+                          height="200%"
+                          x="-50%"
+                          y="-50%">
+                          <feFlood
+                            id="SvgjsFeFlood1633"
+                            flood-color="#000000"
+                            flood-opacity="0.45"
+                            result="SvgjsFeFlood1633Out"
+                            in="SourceGraphic"></feFlood>
+                          <feComposite
+                            id="SvgjsFeComposite1634"
+                            in="SvgjsFeFlood1633Out"
+                            in2="SourceAlpha"
+                            operator="in"
+                            result="SvgjsFeComposite1634Out"></feComposite>
+                          <feOffset
+                            id="SvgjsFeOffset1635"
+                            dx="1"
+                            dy="1"
+                            result="SvgjsFeOffset1635Out"
+                            in="SvgjsFeComposite1634Out"></feOffset>
+                          <feGaussianBlur
+                            id="SvgjsFeGaussianBlur1636"
+                            stdDeviation="1 "
+                            result="SvgjsFeGaussianBlur1636Out"
+                            in="SvgjsFeOffset1635Out"></feGaussianBlur>
+                          <feMerge
+                            id="SvgjsFeMerge1637"
+                            result="SvgjsFeMerge1637Out"
+                            in="SourceGraphic">
+                            <feMergeNode
+                              id="SvgjsFeMergeNode1638"
+                              in="SvgjsFeGaussianBlur1636Out"></feMergeNode>
+                            <feMergeNode
+                              id="SvgjsFeMergeNode1639"
+                              in="[object Arguments]"></feMergeNode>
+                          </feMerge>
+                          <feBlend
+                            id="SvgjsFeBlend1640"
+                            in="SourceGraphic"
+                            in2="SvgjsFeMerge1637Out"
+                            mode="normal"
+                            result="SvgjsFeBlend1640Out"></feBlend>
+                        </filter>
+                        <filter
+                          id="SvgjsFilter1645"
+                          filterUnits="userSpaceOnUse"
+                          width="200%"
+                          height="200%"
+                          x="-50%"
+                          y="-50%">
+                          <feFlood
+                            id="SvgjsFeFlood1646"
+                            flood-color="#000000"
+                            flood-opacity="0.45"
+                            result="SvgjsFeFlood1646Out"
+                            in="SourceGraphic"></feFlood>
+                          <feComposite
+                            id="SvgjsFeComposite1647"
+                            in="SvgjsFeFlood1646Out"
+                            in2="SourceAlpha"
+                            operator="in"
+                            result="SvgjsFeComposite1647Out"></feComposite>
+                          <feOffset
+                            id="SvgjsFeOffset1648"
+                            dx="1"
+                            dy="1"
+                            result="SvgjsFeOffset1648Out"
+                            in="SvgjsFeComposite1647Out"></feOffset>
+                          <feGaussianBlur
+                            id="SvgjsFeGaussianBlur1649"
+                            stdDeviation="1 "
+                            result="SvgjsFeGaussianBlur1649Out"
+                            in="SvgjsFeOffset1648Out"></feGaussianBlur>
+                          <feMerge
+                            id="SvgjsFeMerge1650"
+                            result="SvgjsFeMerge1650Out"
+                            in="SourceGraphic">
+                            <feMergeNode
+                              id="SvgjsFeMergeNode1651"
+                              in="SvgjsFeGaussianBlur1649Out"></feMergeNode>
+                            <feMergeNode
+                              id="SvgjsFeMergeNode1652"
+                              in="[object Arguments]"></feMergeNode>
+                          </feMerge>
+                          <feBlend
+                            id="SvgjsFeBlend1653"
+                            in="SourceGraphic"
+                            in2="SvgjsFeMerge1650Out"
+                            mode="normal"
+                            result="SvgjsFeBlend1653Out"></feBlend>
+                        </filter>
+                      </defs>
+                      <g id="SvgjsG1612" class="apexcharts-pie">
+                        <g id="SvgjsG1613" transform="translate(0, 0) scale(1)">
+                          <g id="SvgjsG1614" class="apexcharts-slices">
+                            <g
+                              id="SvgjsG1615"
+                              class="apexcharts-series apexcharts-pie-series"
+                              seriesName="Ethereum"
+                              rel="1"
+                              data:realIndex="0">
+                              <path
+                                id="SvgjsPath1616"
+                                d="M 101.5 6.475609756097555 A 95.02439024390245 95.02439024390245 0 0 1 193.28651266395633 126.09412194437613 L 101.5 101.5 L 101.5 6.475609756097555"
+                                fill="rgba(119,122,202,1)"
+                                fill-opacity="1"
+                                stroke-opacity="1"
+                                stroke-linecap="butt"
+                                stroke-width="0"
+                                stroke-dasharray="0"
+                                class="apexcharts-pie-area apexcharts-pie-slice-0"
+                                index="0"
+                                j="0"
+                                data:angle="105"
+                                data:startAngle="0"
+                                data:strokeWidth="0"
+                                data:value="35"
+                                data:pathOrig="M 101.5 6.475609756097555 A 95.02439024390245 95.02439024390245 0 0 1 193.28651266395633 126.09412194437613 L 101.5 101.5 L 101.5 6.475609756097555"></path>
+                            </g>
+                            <g
+                              id="SvgjsG1628"
+                              class="apexcharts-series apexcharts-pie-series"
+                              seriesName="Bitcoin"
+                              rel="2"
+                              data:realIndex="1">
+                              <path
+                                id="SvgjsPath1629"
+                                d="M 193.28651266395633 126.09412194437613 A 95.02439024390245 95.02439024390245 0 1 1 34.307609280419754 34.30760928041978 L 101.5 101.5 L 193.28651266395633 126.09412194437613"
+                                fill="rgba(81,86,190,1)"
+                                fill-opacity="1"
+                                stroke-opacity="1"
+                                stroke-linecap="butt"
+                                stroke-width="0"
+                                stroke-dasharray="0"
+                                class="apexcharts-pie-area apexcharts-pie-slice-1"
+                                index="0"
+                                j="1"
+                                data:angle="210"
+                                data:startAngle="105"
+                                data:strokeWidth="0"
+                                data:value="70"
+                                data:pathOrig="M 193.28651266395633 126.09412194437613 A 95.02439024390245 95.02439024390245 0 1 1 34.307609280419754 34.30760928041978 L 101.5 101.5 L 193.28651266395633 126.09412194437613"></path>
+                            </g>
+                            <g
+                              id="SvgjsG1641"
+                              class="apexcharts-series apexcharts-pie-series"
+                              seriesName="Litecoin"
+                              rel="3"
+                              data:realIndex="2">
+                              <path
+                                id="SvgjsPath1642"
+                                d="M 34.307609280419754 34.30760928041978 A 95.02439024390245 95.02439024390245 0 0 1 101.48341511528962 6.475611203401769 L 101.5 101.5 L 34.307609280419754 34.30760928041978"
+                                fill="rgba(168,170,218,1)"
+                                fill-opacity="1"
+                                stroke-opacity="1"
+                                stroke-linecap="butt"
+                                stroke-width="0"
+                                stroke-dasharray="0"
+                                class="apexcharts-pie-area apexcharts-pie-slice-2"
+                                index="0"
+                                j="2"
+                                data:angle="45"
+                                data:startAngle="315"
+                                data:strokeWidth="0"
+                                data:value="15"
+                                data:pathOrig="M 34.307609280419754 34.30760928041978 A 95.02439024390245 95.02439024390245 0 0 1 101.48341511528962 6.475611203401769 L 101.5 101.5 L 34.307609280419754 34.30760928041978"></path>
+                            </g>
+                            <g id="SvgjsG1617" class="apexcharts-datalabels">
+                              <text
+                                id="SvgjsText1618"
+                                font-family="Helvetica, Arial, sans-serif"
+                                x="161.8103339273103"
+                                y="55.22225312355169"
+                                text-anchor="middle"
+                                dominant-baseline="auto"
+                                font-size="12px"
+                                font-weight="600"
+                                fill="#ffffff"
+                                class="apexcharts-text apexcharts-pie-label"
+                                filter="url(#SvgjsFilter1619)"
+                                style="
+                                  font-family: Helvetica, Arial, sans-serif;
+                                ">
+                                29.2%
+                              </text>
+                            </g>
+                            <g id="SvgjsG1630" class="apexcharts-datalabels">
+                              <text
+                                id="SvgjsText1631"
+                                font-family="Helvetica, Arial, sans-serif"
+                                x="63.49024390243903"
+                                y="167.33482874427656"
+                                text-anchor="middle"
+                                dominant-baseline="auto"
+                                font-size="12px"
+                                font-weight="600"
+                                fill="#ffffff"
+                                class="apexcharts-text apexcharts-pie-label"
+                                filter="url(#SvgjsFilter1632)"
+                                style="
+                                  font-family: Helvetica, Arial, sans-serif;
+                                ">
+                                58.3%
+                              </text>
+                            </g>
+                            <g id="SvgjsG1643" class="apexcharts-datalabels">
+                              <text
+                                id="SvgjsText1644"
+                                font-family="Helvetica, Arial, sans-serif"
+                                x="72.40859214645096"
+                                y="31.267128611434657"
+                                text-anchor="middle"
+                                dominant-baseline="auto"
+                                font-size="12px"
+                                font-weight="600"
+                                fill="#ffffff"
+                                class="apexcharts-text apexcharts-pie-label"
+                                filter="url(#SvgjsFilter1645)"
+                                style="
+                                  font-family: Helvetica, Arial, sans-serif;
+                                ">
+                                12.5%
+                              </text>
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                      <line
+                        id="SvgjsLine1654"
+                        x1="0"
+                        y1="0"
+                        x2="203"
+                        y2="0"
+                        stroke="#b6b6b6"
+                        stroke-dasharray="0"
+                        stroke-width="1"
+                        class="apexcharts-ycrosshairs"></line>
+                      <line
+                        id="SvgjsLine1655"
+                        x1="0"
+                        y1="0"
+                        x2="203"
+                        y2="0"
+                        stroke-dasharray="0"
+                        stroke-width="0"
+                        class="apexcharts-ycrosshairs-hidden"></line>
+                    </g>
+                    <g id="SvgjsG1609" class="apexcharts-annotations"></g>
+                  </svg>
+                  <div class="apexcharts-legend"></div>
+                  <div class="apexcharts-tooltip apexcharts-theme-dark">
+                    <div
+                      class="apexcharts-tooltip-series-group"
+                      style="order: 1">
+                      <span
+                        class="apexcharts-tooltip-marker"
+                        style="background-color: rgb(119, 122, 202)"></span>
+                      <div
+                        class="apexcharts-tooltip-text"
+                        style="
+                          font-family: Helvetica, Arial, sans-serif;
+                          font-size: 12px;
+                        ">
+                        <div class="apexcharts-tooltip-y-group">
+                          <span class="apexcharts-tooltip-text-label"></span
+                          ><span class="apexcharts-tooltip-text-value"></span>
+                        </div>
+                        <div class="apexcharts-tooltip-z-group">
+                          <span class="apexcharts-tooltip-text-z-label"></span
+                          ><span class="apexcharts-tooltip-text-z-value"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="apexcharts-tooltip-series-group"
+                      style="order: 2">
+                      <span
+                        class="apexcharts-tooltip-marker"
+                        style="background-color: rgb(81, 86, 190)"></span>
+                      <div
+                        class="apexcharts-tooltip-text"
+                        style="
+                          font-family: Helvetica, Arial, sans-serif;
+                          font-size: 12px;
+                        ">
+                        <div class="apexcharts-tooltip-y-group">
+                          <span class="apexcharts-tooltip-text-label"></span
+                          ><span class="apexcharts-tooltip-text-value"></span>
+                        </div>
+                        <div class="apexcharts-tooltip-z-group">
+                          <span class="apexcharts-tooltip-text-z-label"></span
+                          ><span class="apexcharts-tooltip-text-z-value"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="apexcharts-tooltip-series-group"
+                      style="order: 3">
+                      <span
+                        class="apexcharts-tooltip-marker"
+                        style="background-color: rgb(168, 170, 218)"></span>
+                      <div
+                        class="apexcharts-tooltip-text"
+                        style="
+                          font-family: Helvetica, Arial, sans-serif;
+                          font-size: 12px;
+                        ">
+                        <div class="apexcharts-tooltip-y-group">
+                          <span class="apexcharts-tooltip-text-label"></span
+                          ><span class="apexcharts-tooltip-text-value"></span>
+                        </div>
+                        <div class="apexcharts-tooltip-z-group">
+                          <span class="apexcharts-tooltip-text-z-label"></span
+                          ><span class="apexcharts-tooltip-text-z-value"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="resize-triggers">
+                <div class="expand-trigger">
+                  <div style="width: 252px; height: 211px"></div>
+                </div>
+                <div class="contract-trigger"></div>
+              </div>
+            </div>
+            <div class="col-sm align-self-center">
+              <div class="mt-4 mt-sm-0">
+                <div>
+                  <p class="mb-2">
+                    <i
+                      class="mdi mdi-circle align-middle font-size-10 me-2 text-success"></i>
+                    Bitcoin
+                  </p>
+                  <h6>
+                    0.4412 BTC =
+                    <span class="text-muted font-size-14 fw-normal"
+                      >$ 4025.32</span
+                    >
+                  </h6>
+                </div>
+
+                <div class="mt-4 pt-2">
+                  <p class="mb-2">
+                    <i
+                      class="mdi mdi-circle align-middle font-size-10 me-2 text-primary"></i>
+                    Ethereum
+                  </p>
+                  <h6>
+                    4.5701 ETH =
+                    <span class="text-muted font-size-14 fw-normal"
+                      >$ 1123.64</span
+                    >
+                  </h6>
+                </div>
+
+                <div class="mt-4 pt-2">
+                  <p class="mb-2">
+                    <i
+                      class="mdi mdi-circle align-middle font-size-10 me-2 text-info"></i>
+                    Litecoin
+                  </p>
+                  <h6>
+                    35.3811 LTC =
+                    <span class="text-muted font-size-14 fw-normal"
+                      >$ 2263.09</span
+                    >
+                  </h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end card -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

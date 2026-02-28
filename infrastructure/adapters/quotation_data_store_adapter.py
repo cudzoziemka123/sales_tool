@@ -16,6 +16,9 @@ class QuotationDataStoreAdapter:
         codes: list,
         qty: list,
         prices: list,
+        client_prices: list | None,
     ) -> int | None:
-        return save_kv_quotation_if_configured(request, output_filename, codes, qty, prices)
+        return save_kv_quotation_if_configured(
+            request, output_filename, codes, qty, prices, client_prices
+        )
 

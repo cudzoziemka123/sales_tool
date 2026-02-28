@@ -61,8 +61,8 @@ class _KvExporterStub:
         self.result_filename = result_filename
         self.calls = []
 
-    def export(self, codes, qty, prices, document):
-        self.calls.append((codes, qty, prices, document))
+    def export(self, codes, qty, prices, client_prices, document):
+        self.calls.append((codes, qty, prices, client_prices, document))
         return self.result_filename
 
 
@@ -83,8 +83,8 @@ class _DataStoreStub:
         self.generic_calls.append((request, output_filename, data))
         return 1
 
-    def save_kv_run(self, request, output_filename, codes, qty, prices):
-        self.kv_calls.append((request, output_filename, codes, qty, prices))
+    def save_kv_run(self, request, output_filename, codes, qty, prices, client_prices):
+        self.kv_calls.append((request, output_filename, codes, qty, prices, client_prices))
         return 2
 
 
@@ -161,7 +161,7 @@ class UseCaseTests(unittest.TestCase):
 
     def test_kv_use_case_uses_kv_ports(self):
         input_port = _KvInputPortStub("payload")
-        price_port = _KvPriceProviderStub((["C1"], ["2"], ["100"]))
+        price_port = _KvPriceProviderStub((["C1"], ["2"], ["100"], None))
         exporter = _KvExporterStub("kv_out.xlsx")
         data_store = _DataStoreStub()
         use_case = CreateKvQuotation(input_port, price_port, exporter, data_store)
@@ -179,7 +179,7 @@ class UseCaseTests(unittest.TestCase):
         self.assertEqual(result, "kv_out.xlsx")
         self.assertEqual(input_port.calls, ["kv_doc.xlsx"])
         self.assertEqual(price_port.calls, ["payload"])
-        self.assertEqual(exporter.calls, [(["C1"], ["2"], ["100"], "kv_doc")])
+        self.assertEqual(exporter.calls, [(["C1"], ["2"], ["100"], [20.47], "kv_doc")])
         self.assertEqual(len(data_store.kv_calls), 1)
 
     def test_claas_use_case_passes_request_to_price_provider(self):

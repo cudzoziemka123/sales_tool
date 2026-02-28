@@ -1,7 +1,7 @@
 from time import sleep
 
 from infrastructure.config.env_loader import get_required_env
-from infrastructure.scrapers.samasz_scraper import login_samasz, scrape_prices
+from infrastructure.scrapers.samasz_scraper import login_samasz, scrape_prices, warmup_samasz
 from infrastructure.selenium.webdriver_factory import create_chrome_driver
 
 
@@ -22,7 +22,7 @@ class SamaszPriceProviderAdapter:
             driver.get(self._base_url)
             sleep(5)
             login_samasz(driver, company, email, password)
-            sleep(5)
+            warmup_samasz(driver)
             scrape_prices(driver, data)
         finally:
             driver.quit()

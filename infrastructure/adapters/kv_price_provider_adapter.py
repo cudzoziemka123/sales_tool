@@ -1,3 +1,4 @@
+import logging
 from time import sleep
 
 from infrastructure.config.env_loader import get_required_env
@@ -8,9 +9,13 @@ from infrastructure.scrapers.kv_scraper import (
     get_titles_list,
     login_kv,
     reduce_codes_by_titles,
+    reduce_list_by_titles,
     search_codes,
+    warmup_kv,
 )
 from infrastructure.selenium.webdriver_factory import create_chrome_driver
+
+logger = logging.getLogger(__name__)
 
 
 class KvPriceProviderAdapter:
@@ -19,22 +24,44 @@ class KvPriceProviderAdapter:
     def __init__(self, base_url: str = "https://www.kvgportal.com/AtpCheck/"):
         self._base_url = base_url
 
-    def fetch(self, search_payload: str) -> tuple[list, list, list]:
+    def fetch(self, search_payload: str) -> tuple[list, list, list, list | None]:
         email = get_required_env("KV_LOGIN")
         password = get_required_env("KV_PASSWORD")
+        payload_preview = search_payload[:160].replace("\n", " | ")
+        logger.warning(
+            "KV fetch start: payload_chars=%s payload_lines=%s preview=%s",
+            len(search_payload),
+            len([ln for ln in search_payload.splitlines() if ln.strip()]),
+            payload_preview,
+        )
 
         driver = create_chrome_driver()
         try:
             driver.get(self._base_url)
             sleep(3)
+            logger.warning("KV step: page loaded")
             login_kv(driver, email, password)
+            logger.warning("KV step: login completed")
+            warmup_kv(driver)
+            logger.warning("KV step: warmup completed")
             search_codes(driver, search_payload)
+            logger.warning("KV step: search_codes completed")
 
             codes_list = get_codes_list(driver)
             titles_list = get_titles_list(driver)
             reduced_codes = reduce_codes_by_titles(titles_list, codes_list)
             qty_list = get_qty_list(driver)
             price_list = get_price_list(driver)
-            return reduced_codes, qty_list, price_list
+            reduced_qty = reduce_list_by_titles(titles_list, qty_list)
+            reduced_prices = reduce_list_by_titles(titles_list, price_list)
+            logger.warning(
+                "KV fetch done: codes=%s titles=%s qty=%s prices=%s reduced_codes=%s",
+                len(codes_list),
+                len(titles_list),
+                len(qty_list),
+                len(price_list),
+                len(reduced_codes),
+            )
+            return reduced_codes, reduced_qty, reduced_prices, None
         finally:
             driver.quit()

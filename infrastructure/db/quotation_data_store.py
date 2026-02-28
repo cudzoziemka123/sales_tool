@@ -151,6 +151,7 @@ def save_kv_quotation_if_configured(
     codes: list,
     qty: list,
     prices: list,
+    client_prices: list | None,
 ) -> int | None:
     engine = _get_engine()
     if engine is None:
@@ -173,12 +174,16 @@ def save_kv_quotation_if_configured(
             session.add(run)
             session.flush()
 
-            max_len = max(len(codes), len(qty), len(prices))
+            prices_for_client = client_prices or []
+            max_len = max(len(codes), len(qty), len(prices), len(prices_for_client))
             for idx in range(max_len):
                 code = str(codes[idx]) if idx < len(codes) else ""
                 quantity = str(qty[idx]) if idx < len(qty) else ""
                 price = prices[idx] if idx < len(prices) else None
+                client_price = prices_for_client[idx] if idx < len(prices_for_client) else None
                 payload = {"Code": code, "Quantity": quantity, "Price": price}
+                if client_price is not None:
+                    payload["ClientPrice"] = client_price
                 session.add(
                     QuotationLine(
                         run_id=run.id,

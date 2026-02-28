@@ -5,6 +5,7 @@ Use case: quotation for Krone brand.
 from application.dto.quotation_request import QuotationRequest
 from application.ports.quotation_data_store_ports import QuotationDataStorePort
 from application.ports.quotation_ports import InputDataPort, PriceProviderPort, QuotationExporterPort
+from domain.services import apply_client_prices_to_data
 
 
 class CreateKroneQuotation:
@@ -28,6 +29,13 @@ class CreateKroneQuotation:
         brand = request.brand
         data = self._input_data_port.prepare(filename, brand)
         self._price_provider_port.fill_prices(brand, data)
+        if request.for_client:
+            apply_client_prices_to_data(
+                data,
+                discount=request.discount,
+                markup=request.markup,
+                euro=request.euro,
+            )
         document = filename.replace(".xlsx", "") if filename.endswith(".xlsx") else filename
         output_filename = self._exporter_port.export(data, document)
         self._data_store_port.save_generic_run(request, output_filename, data)

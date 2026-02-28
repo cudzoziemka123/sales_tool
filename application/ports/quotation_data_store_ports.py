@@ -14,6 +14,7 @@ class QuotationDataStorePort(Protocol):
         codes: list,
         qty: list,
         prices: list,
+        client_prices: list | None,
     ) -> int | None:
         ...
 
